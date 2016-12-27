@@ -1,5 +1,3 @@
-#ifndef QUERYASN_H
-#define QUERYASN_H
 #include <string>
 
 using namespace std;
@@ -13,5 +11,3 @@ class QueryASN
     private:
 		string queryPage(string ip);
 };
-
-#endif // QUERYASN_H

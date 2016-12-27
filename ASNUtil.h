@@ -1,5 +1,3 @@
-#ifndef ASNUTIL_H
-#define ASNUTIL_H
 #include <list>
 #include <string>
 
@@ -15,5 +13,3 @@ class ASNUtil
 
     private:
 };
-
-#endif // ASNUTIL_H
