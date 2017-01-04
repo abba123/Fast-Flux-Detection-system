@@ -103,7 +103,6 @@ double RTTQuery::getRTT(string ip)
 			pkt=(struct icmp *)(packet + (iphdr->ihl << 2));	//skip ip header
 			if(pkt->icmp_type == ICMP_ECHOREPLY)
 			{
-				cout << "get reply" << endl;
 				clock_gettime(CLOCK_REALTIME,&end);
 				return diff_in_ms(start,end);
 			}

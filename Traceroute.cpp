@@ -72,7 +72,6 @@ string Traceroute::sendTraceroutePkt(string ip, unsigned short ttl)
 	int setTTL=setsockopt(pingSocket, IPPROTO_IP, IP_TTL, &ttl, sizeof(ttl));
 	
 	c=sendto(pingSocket,packet,sizeof(packet),0,(struct sockaddr *)&pingaddr,sizeof(struct sockaddr_in));
-	cout << "send" <<endl;
 	
 		struct sockaddr_in pktReply;
 		unsigned int pktLenth = sizeof(pktReply);
@@ -80,7 +79,6 @@ string Traceroute::sendTraceroutePkt(string ip, unsigned short ttl)
 		c=recvfrom(pingSocket,packet,sizeof(packet),0,(struct sockaddr *)&pktReply,&pktLenth);	
 		if(c>0)
 		{
-			cout << "receive get" <<endl;
 			struct iphdr *iphdr=(struct iphdr *)packet;
 			pkt=(struct icmp *)(packet + (iphdr->ihl << 2));	//skip ip header
 			struct iphdr* ip_reply = (struct iphdr *) packet;
@@ -94,7 +92,6 @@ string Traceroute::sendTraceroutePkt(string ip, unsigned short ttl)
 		}
 		else
 		{
-			cout << "error" << endl;
 			return "0.0.0.0";
 		}
 }
@@ -114,7 +111,6 @@ string Traceroute::getDomain(string ip)
 
 list<string> Traceroute::getTraceroute(string ip)
 {
-	cout << ip <<endl;
 	flag=0;
 	list<string> tracerouteList;
 	unsigned short ttl=1;
@@ -126,6 +122,19 @@ list<string> Traceroute::getTraceroute(string ip)
 		ttl++;
 	}
 	tracerouteList.unique();
+	return tracerouteList;
+}
+
+list<string> Traceroute::getTracerouteList(list<string> ipList)
+{
+	list<string> tracerouteList;
+	int size=ipList.size();
+	for(int i=0;i<size;i++)
+	{
+		list<string> tmp=getTraceroute(ipList.front());
+		tracerouteList.splice(tracerouteList.end(),tmp);
+		ipList.pop_front();
+	}
 	return tracerouteList;
 }
 
@@ -158,3 +167,4 @@ double Traceroute::TracerouteEntropy(list<string> tracerouteList)
 	Entropy*=-1;
 	return Entropy;
 }
+
