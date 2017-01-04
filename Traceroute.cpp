@@ -12,6 +12,8 @@
 #include <time.h>
 #include <list>
 #include <math.h>
+#include <unistd.h>
+#include <fcntl.h>
 #include "Traceroute.h"
 
 #define DEFDATALEN      56
@@ -59,6 +61,7 @@ string Traceroute::sendTraceroutePkt(string ip, unsigned short ttl)
 	pingSocket = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
 	memset(&pingaddr,0,sizeof(struct sockaddr_in));
 	pingaddr.sin_family=AF_INET;
+	fcntl(pingSocket,F_SETFL,O_NONBLOCK);
 	h=gethostbyname(ip.c_str());
 	memcpy(&pingaddr.sin_addr,h->h_addr,sizeof(pingaddr.sin_addr));
 	pkt=(struct icmp *)packet;
@@ -69,16 +72,15 @@ string Traceroute::sendTraceroutePkt(string ip, unsigned short ttl)
 	int setTTL=setsockopt(pingSocket, IPPROTO_IP, IP_TTL, &ttl, sizeof(ttl));
 	
 	c=sendto(pingSocket,packet,sizeof(packet),0,(struct sockaddr *)&pingaddr,sizeof(struct sockaddr_in));
-
-	while(1)
-	{
+	cout << "send" <<endl;
+	
 		struct sockaddr_in pktReply;
 		unsigned int pktLenth = sizeof(pktReply);
-
-		c=recvfrom(pingSocket,packet,sizeof(packet),0,(struct sockaddr *)&pktReply,&pktLenth);
-		if(c>50)
+		sleep(1);
+		c=recvfrom(pingSocket,packet,sizeof(packet),0,(struct sockaddr *)&pktReply,&pktLenth);	
+		if(c>0)
 		{
-			
+			cout << "receive get" <<endl;
 			struct iphdr *iphdr=(struct iphdr *)packet;
 			pkt=(struct icmp *)(packet + (iphdr->ihl << 2));	//skip ip header
 			struct iphdr* ip_reply = (struct iphdr *) packet;
@@ -90,7 +92,11 @@ string Traceroute::sendTraceroutePkt(string ip, unsigned short ttl)
 			}
 			return srcIP;
 		}
-	}
+		else
+		{
+			cout << "error" << endl;
+			return "0.0.0.0";
+		}
 }
 
 string Traceroute::getDomain(string ip)
@@ -108,6 +114,7 @@ string Traceroute::getDomain(string ip)
 
 list<string> Traceroute::getTraceroute(string ip)
 {
+	cout << ip <<endl;
 	flag=0;
 	list<string> tracerouteList;
 	unsigned short ttl=1;
@@ -128,7 +135,7 @@ int getListCount(list<string> l,string str)
 	int count=0;
 	for(int i=0;i<size;i++)
 	{
-		if(l.front()==str)	count++;
+		if(str.compare(l.front())==0)	count++;
 		l.pop_front();
 	}
 	return count;
@@ -137,15 +144,17 @@ int getListCount(list<string> l,string str)
 double Traceroute::TracerouteEntropy(list<string> tracerouteList)
 {
 	list<string> listCopy=tracerouteList;
+	tracerouteList.sort();
 	tracerouteList.unique();
 	int listSize=tracerouteList.size();
-	int total=listCopy.size();
+	double total=listCopy.size();
 	double Entropy=0;
 	for(int i=0;i<listSize;i++)
 	{
-		int count=getListCount(listCopy,tracerouteList.front());
-		Entropy+=((count/total)*(log(count/total))*-1);
+		double count=getListCount(listCopy,tracerouteList.front());
+		Entropy+=((double)(count/total)*(double)(log10(count/total)));
+		tracerouteList.pop_front();
 	}
+	Entropy*=-1;
 	return Entropy;
 }
-

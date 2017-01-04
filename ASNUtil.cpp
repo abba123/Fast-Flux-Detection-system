@@ -11,7 +11,8 @@ using namespace std;
 //
 list<string> ASNUtil::findUniqueASN(list<string> asnList)
 {
-    asnList.unique();
+    asnList.sort();
+	asnList.unique();
     return asnList;
 }
 
