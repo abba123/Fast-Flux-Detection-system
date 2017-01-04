@@ -75,7 +75,7 @@ string Traceroute::sendTraceroutePkt(string ip, unsigned short ttl)
 	
 		struct sockaddr_in pktReply;
 		unsigned int pktLenth = sizeof(pktReply);
-		sleep(1);
+		usleep(500000);
 		c=recvfrom(pingSocket,packet,sizeof(packet),0,(struct sockaddr *)&pktReply,&pktLenth);	
 		if(c>0)
 		{
