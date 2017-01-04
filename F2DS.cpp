@@ -31,6 +31,8 @@ int main(int argc, char* argv[])
     int month = 1+t->tm_mon;
     int day = t->tm_mday;
 /////////////////////////////
+	int best[5]={20,115,5,818,700};
+
     ASNUtil asnUtility;
 	QueryASN asnQuery;
 	RTTQuery rttQuery;
@@ -51,11 +53,16 @@ int main(int argc, char* argv[])
 	list<double> rttList=rttQuery.getRTTList(ipList);
 	double rttstd=rttUtility.stdRTT(rttList);
 
-	cout << "A Record : " << ipList.size();
-	cout << "Unique ASN : " << asnList.size();
+	cout << "A Record : " << ipList.size() << endl;
+	cout << "Unique ASN : " << asnList.size() << endl;
 	cout << "RTT STD : " << rttstd << endl;
 	cout << "Traceroute Entropy : " << trEntropy << endl;
 
+	double result=0;
+	result = ipList.size()*best[0] + asnList.size()*best[1] + rttstd/100*best[2] + trEntropy*best[3] - best[4];
+	if(result > 0)	cout << "FF Domain" << endl;
+	else	cout << "Benign Domain" << endl;
+	
 	return 0;
 	
 }
